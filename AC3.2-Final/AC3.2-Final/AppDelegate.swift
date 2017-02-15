@@ -8,7 +8,6 @@
 
 import UIKit
 import Firebase
-import FirebaseAuth
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -22,14 +21,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         
         self.window = UIWindow(frame: UIScreen.main.bounds)
-        
-        if let _ = FIRAuth.auth()?.currentUser {
-            self.window?.rootViewController = AppDelegate.finalInstagramTabBarController()
-        } else {
-            self.window?.rootViewController = LoginViewController()
-        }
-        
+        self.window?.rootViewController = AppDelegate.finalInstagramTabBarController()
         self.window?.makeKeyAndVisible()
+
         
         return true
     }
@@ -39,9 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let uploadViewController = UploadViewController()
         let feedViewController = FeedViewController()
         
-        let feedImage = UIImage(named: "chickenleg")
         let feedIcon = UITabBarItem(title: "Feed", image: UIImage(named: "chickenleg"), selectedImage: UIImage(named: "chickenleg"))
-        //TO DO FIX IMAGE SIZE ON BOTH
         feedViewController.tabBarItem = feedIcon
         
         let uploadIcon = UITabBarItem(title: "Upload", image: UIImage(named: "upload"), selectedImage: UIImage(named: "upload"))

@@ -119,7 +119,7 @@ class LoginViewController: UIViewController {
                 self.loginButton.isEnabled = true
             })
         }
-
+        
     }
     
     func registerButtonPressed () {
@@ -138,20 +138,20 @@ class LoginViewController: UIViewController {
             })
         }
     }
-
+    
     func showAlert(title: String, message: String?, transition: Bool = false) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let ok = UIAlertAction(title: "OK", style: .default) { action -> Void in
             if transition {
-            self.present(AppDelegate.finalInstagramTabBarController(), animated: true, completion: nil)
+                self.dismiss(animated: true, completion: nil)
             }
         }
         alert.addAction(ok)
         
         self.present(alert, animated: true, completion: nil)
     }
-
-
+    
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         print("WOAH THERE BUDDY YOURE ALMOST OUTTA MEMORY")

@@ -12,7 +12,7 @@ import FirebaseStorage
 import FirebaseDatabase
 
 class FeedViewController: UIViewController, UITableViewDelegate, UITableViewDataSource  {
-
+    
     var photos = [FIRPhotoObject]()
     
     override func viewDidLoad() {
@@ -20,8 +20,14 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         // Do any additional setup after loading the view.
         setupNavigationBar()
         setUpTableView()
+        areYouLoggedInQuestionMark()
     }
-
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        getUploadedImages()
+    }
+    
     //MARK: - View Hierarchy and Constraints
     
     func setupNavigationBar () {
@@ -39,12 +45,10 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         feedTableView.delegate = self
         feedTableView.estimatedRowHeight = 400
         feedTableView.rowHeight = UITableViewAutomaticDimension
-
+        
         feedTableView.snp.makeConstraints { (view) in
             view.top.bottom.trailing.leading.equalToSuperview()
         }
-        
-        getUploadedImages()
     }
     
     func getUploadedImages () {
@@ -55,22 +59,18 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
             self.photos.removeAll()
             for child in snapshot.children {
                 if let snap = child as? FIRDataSnapshot,
-                    let valueDict = snap.value as? [String: String] {
-                    let photo = FIRPhotoObject(key: snap.key,
-                                          userID: valueDict["userID"] ?? "",
-                                          comment: valueDict["comment"] ?? "")
+                    let valueDict = snap.value as? [String: AnyObject] {
+                    let photo = FIRPhotoObject(dict: valueDict, key: snap.key)
                     self.photos.append(photo)
                 }
             }
             self.feedTableView.reloadData()
-            print(self.photos)
         })
-
+        
     }
-
+    
     //MARK: - Actions
     func logoutButtonPressed () {
-        print("pressed")
         if let _ = FIRAuth.auth()?.currentUser {
             do {
                 try FIRAuth.auth()?.signOut()
@@ -99,15 +99,16 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: PhotoTableViewCell.cellID, for: indexPath) as! PhotoTableViewCell
         let currentPhoto = self.photos[indexPath.row]
-        print(currentPhoto.asDictionary)
         let storageRef = FIRStorage.storage().reference().child("images").child(currentPhoto.key)
         
         storageRef.data(withMaxSize: 1 * 1012 * 1024) { (data, error) in
             if let error = error {
                 print(error)
+                cell.uploadedImageView.contentMode = .center
                 cell.uploadedImageView.image = UIImage(named: "camera_icon")
             }
             if let validData = data {
+                cell.uploadedImageView.contentMode = .scaleAspectFit
                 cell.uploadedImageView.image = UIImage(data: validData)
                 cell.setNeedsDisplay()
             }
@@ -116,6 +117,15 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         cell.commentLabel.text = currentPhoto.comment
         
         return cell
+    }
+    
+    func areYouLoggedInQuestionMark () {
+        if let _ = FIRAuth.auth()?.currentUser {
+            print("logged in")
+        } else {
+            self.present(LoginViewController(), animated: true, completion: nil)
+        }
+        
     }
     
     override func didReceiveMemoryWarning() {
