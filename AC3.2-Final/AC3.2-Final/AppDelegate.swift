@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Firebase
+import FirebaseAuth
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,8 +18,50 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        FIRApp.configure()
+        
+        
+        self.window = UIWindow(frame: UIScreen.main.bounds)
+        
+        if let _ = FIRAuth.auth()?.currentUser {
+            self.window?.rootViewController = finalInstagramTabBarController()
+        } else {
+            self.window?.rootViewController = LoginViewController()
+        }
+        
+        self.window?.makeKeyAndVisible()
+        
+        if self.window!.rootViewController as? UITabBarController != nil {
+            let tababarController = self.window!.rootViewController as! UITabBarController
+            if FIRAuth.auth()?.currentUser == nil {
+                tababarController.selectedIndex = 2
+            }
+        }
+
+        
         return true
     }
+    
+    
+    func finalInstagramTabBarController() -> UITabBarController {
+        let uploadViewController = UploadViewController()
+        let feedViewController = FeedViewController()
+        
+        let feedImage = UIImage(named: "chickenleg")
+        let feedIcon = UITabBarItem(title: "Feed", image: UIImage(named: "chickenleg"), selectedImage: UIImage(named: "chickenleg"))
+        //TO DO FIX IMAGE SIZE ON BOTH
+        feedViewController.tabBarItem = feedIcon
+        
+        let uploadIcon = UITabBarItem(title: "Upload", image: UIImage(named: "upload"), selectedImage: UIImage(named: "upload"))
+        uploadViewController.tabBarItem = uploadIcon
+        
+        let tabBarController = UITabBarController()
+        tabBarController.viewControllers = [UINavigationController(rootViewController: feedViewController), UINavigationController(rootViewController: uploadViewController)]
+        
+        return tabBarController
+    }
+    
+
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
