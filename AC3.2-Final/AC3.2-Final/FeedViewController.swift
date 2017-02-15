@@ -8,13 +8,18 @@
 
 import UIKit
 import FirebaseAuth
+import FirebaseStorage
+import FirebaseDatabase
 
 class FeedViewController: UIViewController, UITableViewDelegate, UITableViewDataSource  {
 
+    var photos = [FIRPhotoObject]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         setupNavigationBar()
+        setUpTableView()
     }
 
     //MARK: - View Hierarchy and Constraints
@@ -27,15 +32,42 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func setUpTableView() {
+        self.edgesForExtendedLayout = []
+        
         self.view.addSubview(feedTableView)
         feedTableView.dataSource = self
         feedTableView.delegate = self
-        
+        feedTableView.estimatedRowHeight = 400
+        feedTableView.rowHeight = UITableViewAutomaticDimension
+
         feedTableView.snp.makeConstraints { (view) in
             view.top.bottom.trailing.leading.equalToSuperview()
         }
-    }
         
+        getUploadedImages()
+    }
+    
+    func getUploadedImages () {
+        let databaseRef = FIRDatabase.database().reference().child("posts")
+        
+        databaseRef.observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            self.photos.removeAll()
+            for child in snapshot.children {
+                if let snap = child as? FIRDataSnapshot,
+                    let valueDict = snap.value as? [String: String] {
+                    let photo = FIRPhotoObject(key: snap.key,
+                                          userID: valueDict["userID"] ?? "",
+                                          comment: valueDict["comment"] ?? "")
+                    self.photos.append(photo)
+                }
+            }
+            self.feedTableView.reloadData()
+            print(self.photos)
+        })
+
+    }
+
     //MARK: - Actions
     func logoutButtonPressed () {
         print("pressed")
@@ -55,19 +87,34 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
     var feedTableView: UITableView = {
         let view = UITableView()
         view.register(PhotoTableViewCell.self, forCellReuseIdentifier: PhotoTableViewCell.cellID)
-        view.estimatedRowHeight = 400
-        view.rowHeight = UITableViewAutomaticDimension
         return view
     }()
     
     //MARK: - Table View Delegates
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 0
+        return photos.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: PhotoTableViewCell.cellID, for: indexPath) as! PhotoTableViewCell
+        let currentPhoto = self.photos[indexPath.row]
+        print(currentPhoto.asDictionary)
+        let storageRef = FIRStorage.storage().reference().child("images").child(currentPhoto.key)
+        
+        storageRef.data(withMaxSize: 1 * 1012 * 1024) { (data, error) in
+            if let error = error {
+                print(error)
+                cell.uploadedImageView.image = UIImage(named: "camera_icon")
+            }
+            if let validData = data {
+                cell.uploadedImageView.image = UIImage(data: validData)
+                cell.setNeedsDisplay()
+            }
+        }
+        
+        cell.commentLabel.text = currentPhoto.comment
+        
         return cell
     }
     

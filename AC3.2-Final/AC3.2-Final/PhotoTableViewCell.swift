@@ -11,10 +11,15 @@ import UIKit
 class PhotoTableViewCell: UITableViewCell {
     
     static let cellID = "photo cell id"
-
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
+    
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupViewHierarchy()
+        configureConstraints()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     override func prepareForReuse() {
@@ -26,8 +31,8 @@ class PhotoTableViewCell: UITableViewCell {
     //MARK: - View Hierarchy and Constraints
     
     func setupViewHierarchy() {
-        self.addSubview(uploadedImageView)
-        self.addSubview(commentLabel)
+        self.contentView.addSubview(uploadedImageView)
+        self.contentView.addSubview(commentLabel)
     }
     
     func configureConstraints () {

@@ -7,25 +7,23 @@
 //
 
 import UIKit
-
 import FirebaseAuth
 import FirebaseStorage
 import FirebaseDatabase
-
 import AVKit
 import AVFoundation
 import MobileCoreServices
 
 
-class UploadViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-
+class UploadViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextViewDelegate {
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViewHierarchy()
         configureConstraints()
         setupNavigationBar()
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
@@ -39,10 +37,14 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
         self.navigationItem.title = "POST IMAGES HERE"
         self.navigationItem.rightBarButtonItem = uploadButton
     }
-
+    
     
     func setupViewHierarchy () {
         let views = [uploadImageView, commentTextView].map { self.view.addSubview($0) }
+        
+        let uploadTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(uploadImageTapped))
+        uploadImageView.addGestureRecognizer(uploadTapGestureRecognizer)
+        commentTextView.delegate = self
     }
     
     func configureConstraints () {
@@ -66,21 +68,17 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
         view.backgroundColor = .lightGray
         
         view.image = UIImage(named: "camera_icon")
-        view.contentMode = .scaleAspectFit
+        view.contentMode = .center
         view.clipsToBounds = true
-        
-        
-        //TO DO fix this shit -- WHY ISNT IT WORKING?!
         view.isUserInteractionEnabled = true
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(uploadImageTapped))
-        view.addGestureRecognizer(tapGestureRecognizer)
         
         return view
     }()
-
+    
     var commentTextView: UITextView = {
         let view = UITextView()
         view.text = "Add Comment...."
+        view.clearsOnInsertion = true
         return view
     }()
     
@@ -107,14 +105,14 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
         let newMetadata = FIRStorageMetadata()
         newMetadata.cacheControl = "public,max-age=300"
         newMetadata.contentType = "image/jpeg"
-
+        
         
         storageRef.put(jpeg!, metadata: newMetadata) { (metadata, error) in
             if let error = error {
                 self.showAlert(title: "Error", message: error.localizedDescription)
             }
             if let _ = metadata {
-                self.showAlert(title: "Success", message: "hopefully this gets liked..")
+                self.showAlert(title: "Success", message: "hopefully this gets liked..", reset: true)
             }
         }
         
@@ -123,15 +121,28 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
                                    comment: self.commentTextView.text)
         
         databaseRef.setValue(photo.asDictionary)
-        }
+        
+    }
+    
+    //MARK: - Helper
+    
+    func resetViews () {
+        uploadImageView.image = UIImage(named: "camera_icon")
+        uploadImageView.contentMode = .center
+        commentTextView.text = "Add Comment...."
+    }
     
     
     //MARK: - Alert
     
     
-    func showAlert(title: String, message: String?) {
+    func showAlert(title: String, message: String?, reset: Bool = false) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        let ok = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+        let ok = UIAlertAction(title: "OK", style: .cancel, handler: { action in
+            if reset {
+                self.resetViews()
+            }
+        })
         alert.addAction(ok)
         self.present(alert, animated: true, completion: nil)
     }
@@ -144,6 +155,7 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
         
         if info[UIImagePickerControllerMediaType] as! String == kUTTypeImage as String {
             if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
+                self.uploadImageView.contentMode = .scaleAspectFit
                 self.uploadImageView.image = image
             }
         }
@@ -153,4 +165,19 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
     override func doesNotRecognizeSelector(_ aSelector: Selector!) {
         print("fucked.")
     }
+    
+    //MARK: - Text View Delegate
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if textView.text == "Add Comment...." {
+            textView.text = ""
+        }
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if textView.text == "" {
+            textView.text = "Add Comment...."
+        }
+
+    }
+
 }
