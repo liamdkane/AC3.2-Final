@@ -11,8 +11,6 @@ import SnapKit
 import FirebaseAuth
 
 class LoginViewController: UIViewController {
-
-    var user: FIRUser?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -114,7 +112,7 @@ class LoginViewController: UIViewController {
                 }
                 if user != nil {
                     print("SUCCESS.... \(user!.uid)")
-                    self.showAlert(title: "Welcome? Back", message: "Enjoy....")
+                    self.showAlert(title: "Welcome? Back", message: "Enjoy....", transition: true)
                 } else {
                     self.showAlert(title: "Log In Failed", message: error?.localizedDescription)
                 }
@@ -132,9 +130,7 @@ class LoginViewController: UIViewController {
                     print("error with completion while creating new Authentication: \(error!)")
                 }
                 if user != nil {
-                    self.showAlert(title: "Welcome?", message: "Enjoy....")
-                    self.user = user
-                    self.present(FeedViewController(), animated: true, completion: nil)
+                    self.showAlert(title: "welcome", message: "..thanks for joining..", transition: true)
                 } else {
                     self.showAlert(title: "Error", message: error?.localizedDescription)
                 }
@@ -142,12 +138,12 @@ class LoginViewController: UIViewController {
             })
         }
     }
-    
-    func showAlert(title: String, message: String?) {
+
+    func showAlert(title: String, message: String?, transition: Bool = false) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let ok = UIAlertAction(title: "OK", style: .default) { action -> Void in
-            if let _ = self.user {
-                self.present(FeedViewController(), animated: true, completion: nil)
+            if transition {
+            self.present(AppDelegate.finalInstagramTabBarController(), animated: true, completion: nil)
             }
         }
         alert.addAction(ok)

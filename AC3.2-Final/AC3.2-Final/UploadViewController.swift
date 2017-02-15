@@ -7,7 +7,11 @@
 //
 
 import UIKit
+
 import FirebaseAuth
+import FirebaseStorage
+import FirebaseDatabase
+
 import AVKit
 import AVFoundation
 import MobileCoreServices
@@ -19,7 +23,7 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
         super.viewDidLoad()
         setupViewHierarchy()
         configureConstraints()
-        
+        setupNavigationBar()
     }
 
     override func didReceiveMemoryWarning() {
@@ -29,8 +33,16 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
     
     //MARK: - View Hierarchy and Constraints
     
+    func setupNavigationBar () {
+        let uploadButton = UIBarButtonItem(title: "UPLOAD", style: UIBarButtonItemStyle.plain, target: self, action: #selector(uploadButtonPressed))
+        self.view.addSubview(UINavigationBar())
+        self.navigationItem.title = "POST IMAGES HERE"
+        self.navigationItem.rightBarButtonItem = uploadButton
+    }
+
+    
     func setupViewHierarchy () {
-        let views = [uploadImageView].map { self.view.addSubview($0) }
+        let views = [uploadImageView, commentTextView].map { self.view.addSubview($0) }
     }
     
     func configureConstraints () {
@@ -40,29 +52,42 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
             view.top.width.centerX.equalToSuperview()
             view.height.equalTo(uploadImageView.snp.width)
         }
+        
+        commentTextView.snp.makeConstraints { (view) in
+            view.top.equalTo(uploadImageView.snp.bottom)
+            view.leading.trailing.bottom.equalToSuperview()
+        }
     }
     
-    //MARK: - Views 
+    //MARK: - Views
     
-    lazy var uploadImageView: UIImageView = {
+    var uploadImageView: UIImageView = {
         let view = UIImageView()
         view.backgroundColor = .lightGray
         
-        let origImage = UIImage(named: "camera_icon")
+        view.image = UIImage(named: "camera_icon")
         view.contentMode = .scaleAspectFit
         view.clipsToBounds = true
         
-        let tapGestureRecognizer = UITapGestureRecognizer(target:self, action:#selector(uploadImageTapped))
+        
+        //TO DO fix this shit -- WHY ISNT IT WORKING?!
         view.isUserInteractionEnabled = true
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(uploadImageTapped))
         view.addGestureRecognizer(tapGestureRecognizer)
         
-        view.layer.shadowColor = UIColor.black.cgColor
-        view.layer.shadowOpacity = 0.8
-        view.layer.shadowOffset = CGSize(width: 0, height: 5)
-        view.layer.shadowRadius = 8
         return view
     }()
 
+    var commentTextView: UITextView = {
+        let view = UITextView()
+        view.text = "Add Comment...."
+        return view
+    }()
+    
+    
+    //MARK - Actions
+    
+    
     func uploadImageTapped() {
         let imagePickerController = UIImagePickerController()
         imagePickerController.modalPresentationStyle = .currentContext
@@ -73,7 +98,47 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
         self.present(imagePickerController, animated: true, completion: nil)
     }
     
+    func uploadButtonPressed() {
+        let databaseRef = FIRDatabase.database().reference().child("posts").childByAutoId()
+        let storageRef = FIRStorage.storage().reference().child("images/\(databaseRef.key)")
+        
+        let jpeg = UIImageJPEGRepresentation(self.uploadImageView.image!, 0.7)
+        
+        let newMetadata = FIRStorageMetadata()
+        newMetadata.cacheControl = "public,max-age=300"
+        newMetadata.contentType = "image/jpeg"
+
+        
+        storageRef.put(jpeg!, metadata: newMetadata) { (metadata, error) in
+            if let error = error {
+                self.showAlert(title: "Error", message: error.localizedDescription)
+            }
+            if let _ = metadata {
+                self.showAlert(title: "Success", message: "hopefully this gets liked..")
+            }
+        }
+        
+        let photo = FIRPhotoObject(key: databaseRef.key,
+                                   userID: (FIRAuth.auth()?.currentUser?.uid)!,
+                                   comment: self.commentTextView.text)
+        
+        databaseRef.setValue(photo.asDictionary)
+        }
+    
+    
+    //MARK: - Alert
+    
+    
+    func showAlert(title: String, message: String?) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let ok = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+        alert.addAction(ok)
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    
     //MARK: - Image Pick Delegate
+    
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         
@@ -84,5 +149,8 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
         }
         self.dismiss(animated: true, completion: nil)
     }
-
+    
+    override func doesNotRecognizeSelector(_ aSelector: Selector!) {
+        print("fucked.")
+    }
 }

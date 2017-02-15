@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="elB-ZK-wWi">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Item 2-->
+        <scene sceneID="hFb-8B-gJK">
+            <objects>
+                <viewController id="9Xc-x8-1uc" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="4mG-cr-rth"/>
+                        <viewControllerLayoutGuide type="bottom" id="PRX-O3-qHR"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="ixM-pe-Hcs">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Item 2" selectedImage="upload" id="56g-zM-Rfj"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="FYQ-bo-TXT" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="530" y="175"/>
+        </scene>
+        <!--Item 1-->
+        <scene sceneID="eYr-ts-Nsn">
+            <objects>
+                <viewController id="G38-LK-fNE" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="AMo-rk-hNC"/>
+                        <viewControllerLayoutGuide type="bottom" id="Ah6-Pf-PlG"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="6aj-T0-f3e">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Item 1" image="chickenleg" id="rdC-8Z-gBO"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iUM-lz-JRS" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="530" y="-480"/>
+        </scene>
+        <!--Tab Bar Controller-->
+        <scene sceneID="IeI-gC-JVg">
+            <objects>
+                <tabBarController id="elB-ZK-wWi" sceneMemberID="viewController">
+                    <tabBar key="tabBar" contentMode="scaleToFill" id="U9V-Nn-nng">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="49"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="G38-LK-fNE" kind="relationship" relationship="viewControllers" id="l32-Z5-hdE"/>
+                        <segue destination="9Xc-x8-1uc" kind="relationship" relationship="viewControllers" id="SNo-4k-AuZ"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="UXB-op-B5Q" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-422" y="-152"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="chickenleg" width="24" height="25"/>
+        <image name="upload" width="25" height="25"/>
+    </resources>
+</document>

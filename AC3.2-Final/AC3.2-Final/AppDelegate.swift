@@ -24,26 +24,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window = UIWindow(frame: UIScreen.main.bounds)
         
         if let _ = FIRAuth.auth()?.currentUser {
-            self.window?.rootViewController = finalInstagramTabBarController()
+            self.window?.rootViewController = AppDelegate.finalInstagramTabBarController()
         } else {
             self.window?.rootViewController = LoginViewController()
         }
         
         self.window?.makeKeyAndVisible()
         
-        if self.window!.rootViewController as? UITabBarController != nil {
-            let tababarController = self.window!.rootViewController as! UITabBarController
-            if FIRAuth.auth()?.currentUser == nil {
-                tababarController.selectedIndex = 2
-            }
-        }
-
-        
         return true
     }
     
     
-    func finalInstagramTabBarController() -> UITabBarController {
+    static func finalInstagramTabBarController() -> UITabBarController {
         let uploadViewController = UploadViewController()
         let feedViewController = FeedViewController()
         
