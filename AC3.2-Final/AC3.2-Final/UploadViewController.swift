@@ -19,6 +19,7 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.view.backgroundColor = .white
         setupViewHierarchy()
         configureConstraints()
         setupNavigationBar()
@@ -56,8 +57,10 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
         }
         
         commentTextView.snp.makeConstraints { (view) in
-            view.top.equalTo(uploadImageView.snp.bottom)
-            view.leading.trailing.bottom.equalToSuperview()
+            view.top.equalTo(uploadImageView.snp.bottom).offset(6)
+            view.trailing.equalToSuperview().inset(6)
+            view.leading.equalToSuperview().offset(6)
+            view.bottom.equalToSuperview().inset(18)
         }
     }
     
@@ -78,7 +81,8 @@ class UploadViewController: UIViewController, UIImagePickerControllerDelegate, U
     var commentTextView: UITextView = {
         let view = UITextView()
         view.text = "Add Comment...."
-        view.clearsOnInsertion = true
+        view.layer.borderWidth = 0.5
+        view.layer.borderColor = UIColor.black.cgColor
         return view
     }()
     
